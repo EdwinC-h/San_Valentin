@@ -133,8 +133,8 @@ body {
 
 #leaves {
   position: absolute;
-  bottom: 60px; /* encima del tronco */
-  left: 50%;
+  bottom: 40px; /* encima del tronco */
+  left: 45%;
   transform: translateX(-50%);
   width: 300px;
   height: 260px;
@@ -201,25 +201,44 @@ body {
 /* Mensaje y contador debajo del suelo */
 #message {
   position: absolute;
-  top: 70%;
+  top: 62.4%;
   left: 30%;
   transform: translateX(-50%);
   text-align: center;
   z-index: 6;
-  color: #6b0a17;
+  color: #55000b;
   font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  /* permitir saltos de línea internos si los inserta JS */
+  white-space: pre-wrap;
 }
 
 #message .label {
   font-size: 20px;
   opacity: 0.9;
-  margin-bottom: 6px;
+  margin-bottom: -35px; /* más cerca del contador */
 }
 
 #counter {
   font-size: 25px;
   font-weight: 600;
-  color: #b3002d;
+  color: #0f0f0fea;
+  text-shadow: 0 13px 30px rgb(255, 0, 0);;
+  white-space: pre-wrap; /* permitir mostrar el <br> en móviles */
+  margin-top: 0; /* asegurar proximidad al mensaje */
+}
+
+#counter br { display: none; }
+
+/* Show break on narrow mobile viewport */
+@media (max-width: 390px) and (max-height: 844px) {
+  #counter br { display: block; 
+  max-width: 140px;}
+  /* reducir desplazamiento y apilar mensaje junto al árbol */
+  #message {
+    left: 20%;
+    /* mantener texto centrado en su propio contenedor */
+    text-align: center;
+  }
 }
 
 /* Animación letra por letra */
@@ -246,7 +265,7 @@ body {
   opacity: 1;
 }
 
-/* Texto inicial "para Paula" */
+/* Texto inicial*/
 #intro {
   position: absolute;
   top: 30%;
@@ -254,11 +273,42 @@ body {
   transform: translateX(-50%);
   font-size: 20px;
   font-weight: 700;
-  color: #6b0a17;
+  color: #b40018;
   z-index: 12;
   pointer-events: none;
   transition: opacity 300ms ease, transform 300ms ease;
 }
+
+/* ------------------------------------------------------------------ */
+/* TEXTO MAQUINA DE ESCRIBIR AL LADO IZQUIERDO */
+#typewriter {
+  position: absolute;
+  top: 45%;
+  left: 15%;
+  transform: translateY(-50%);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 24px;
+  color: #4d2200;
+  white-space: pre-wrap; /* permitir saltos de línea y ajuste automático */
+  overflow: hidden;
+  max-width: 30%; /* controlar ancho para que se corte en varias líneas */
+  z-index: 12;
+  text-shadow: 0 20px 50px rgb(255, 174, 0);
+}
+
+#typewriter .cursor {
+  display: inline-block;
+  width: 2px;
+  background: #753104;
+  margin-left: 2px;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+/* ------------------------------------------------------------------ */
 
 .hidden {
   opacity: 0 !important;
@@ -274,7 +324,7 @@ body {
   transform: translateX(-50%) translateY(6px);
   font-size: 20px;
   font-weight: 700;
-  color: #6b0a17;
+  color: #9c0015;
   z-index: 12;
   opacity: 0;
   transition: opacity 300ms ease, transform 300ms ease;
@@ -294,11 +344,11 @@ body {
   transform: translateX(-50%) translateY(6px);
   font-family: "Harlow Solid Italic", 'Great Vibes', cursive;
   font-size: 44px;
-  color: #b3002d;
+  color: #c2294f;
   text-align: center;
   z-index: 20;
   opacity: 0;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  text-shadow: 0 10px 20px rgb(255, 2, 2);
   transition: opacity 500ms ease, transform 500ms ease;
   pointer-events: none;
 }
@@ -307,6 +357,41 @@ body {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* letras animadas del título final */
+#valentine-title span {
+  display: inline-block;
+  opacity: 0;
+  position: relative;
+  color: #b3002d;
+  /* invisible stroke-like effect using text-shadow initially */
+  margin-right: 2px; /* espacio entre letras*/
+}
+
+#valentine-title span.space {
+  margin-right: 6px; /* más separación cuando es espacio */
+}
+
+@keyframes sparkle {
+  0%,100% { text-shadow: none; }
+  50% { text-shadow: 0 0 8px #ff4d4d, 0 0 12px #ff1744; }
+}
+
+/* cuando la letra aparece, le aplicamos un brillo rojo y rotación leve */
+#valentine-title span.visible {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+/* efecto de escritura: desde abajo hacia arriba con opacidad */
+@keyframes writeIn {
+  0% { opacity: 0; transform: translateY(20px) rotate(10deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+#valentine-title span.write {
+  animation: writeIn 0.4s ease forwards;
+}
+
 
 /* HOJAS VOLANDO POR EL VIENTO */
 .flying-leaf {
@@ -407,25 +492,13 @@ body {
   #tree-container { bottom: 174px; }
   #tree-container.move-left { transform: translateX(calc(-50% + 25vw)); }
   #grow-title { bottom: 340px; font-size: clamp(14px, 3.2vw, 20px); }
-  #valentine-title { font-size: clamp(22px, 8vw, 44px); top: 6%; }
+  #valentine-title { font-size: clamp(22px, 8vw, 44px); top: 20%; }
   #message { top: 75%; }
   #message .label { font-size: clamp(12px, 3vw, 16px); }
   #counter { font-size: clamp(14px, 3.5vw, 18px); }
 }
 
-@media (max-width: 420px) {
-  /* Ajustes más agresivos para pantallas muy pequeñas */
-  #heart { width: 44px; height: 44px; top: 34%; }
-  #tree img { height: clamp(140px, 28vh, 220px); }
-  #leaves { width: 180px; height: 140px; bottom: 28px; }
-  #tree-container.move-left { transform: translateX(calc(-50% + 14vw)); }
-  #grow-title { bottom: 110px; font-size: 14px; }
-  #valentine-title { font-size: 20px; top: 4%; }
-  #message { top: 88%; left: 50%; transform: translateX(-50%); padding: 0 12px; }
-  #message .label { font-size: 13px; margin-bottom: 4px; }
-  #counter { font-size: 13px; }
-  .flying-leaf { width: 12px; height: 12px; }
-}
+
 
 /* Reduce motion preference respect */
 @media (prefers-reduced-motion: reduce) {
@@ -446,11 +519,12 @@ body {
   #tree-container.move-left { transform: translateX(calc(-50% + 30vw)); }
 
   /* Títulos y mensaje */
-  #grow-title { bottom: 230px; font-size: 16px; }
-  #valentine-title { font-size: 24px; top: 6%; }
-  #message { top: 76%; width: 80%; left: 40%; transform: translateX(-50%); }
+  #grow-title { bottom: 250px; font-size: 16px; }
+  #valentine-title { font-size: 24px; top: 25%; }
+  #message { top: 65%; width: 80%; left: 26%; transform: translateX(-50%); }
   #message .label { font-size: 14px; }
   #counter { font-size: 14px; }
+  #typewriter { top: 45%; left: 15%; max-width: 80%; font-size: 18px; }
 
   /* Hojas voladoras más pequeñas */
   .flying-leaf { width: 12px; height: 12px; }

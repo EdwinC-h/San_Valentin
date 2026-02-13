@@ -37,20 +37,8 @@ heart.addEventListener("click", () => {
       // ocultar el título después de unos segundos
       setTimeout(() => growTitle.classList.remove('visible'), 3000);
     }
-    // Disparar la revelación del mensaje al terminar la transición del tronco
-    const treeImg = tree.querySelector('img');
-    if (treeImg) {
-      const onEnd = (e) => {
-        // esperar al fin del recorte (clip-path)
-        if (!e.propertyName || e.propertyName.includes('clip-path')) {
-          if (typeof revealMessage === 'function') revealMessage();
-          treeImg.removeEventListener('transitionend', onEnd);
-        }
-      };
-      treeImg.addEventListener('transitionend', onEnd);
-    } else {
-      if (typeof revealMessage === 'function') revealMessage();
-    }
+    // No revelamos mensaje aún; esperaré al desplazamiento del árbol para mostrar texto y contador.
+    // (se hará más abajo en onMoveEnd)
   }, 1200);
 
   setTimeout(() => {
@@ -63,7 +51,14 @@ heart.addEventListener("click", () => {
     const onMoveEnd = (e) => {
       if (!e.propertyName || e.propertyName.includes('transform')) {
         const valTitle = document.getElementById('valentine-title');
-        if (valTitle) valTitle.classList.add('visible');
+        if (valTitle) {
+          valTitle.classList.add('visible');
+          animateValentineTitle(valTitle);
+        }
+        // ahora que el árbol se desplazó y dejó espacio, revelamos el mensaje y el contador
+        if (typeof revealMessage === 'function') revealMessage();
+        // y empezamos el texto tipo máquina de escribir
+        startTypewriter();
         treeContainer.removeEventListener('transitionend', onMoveEnd);
       }
     };
@@ -76,6 +71,7 @@ heart.addEventListener("click", () => {
     blowAwayLeaves();
   }, 4600);
 
+  
 });
 
 /*ESTE APARTADO YA ES SOLO PARA LAS HOJAS*/
@@ -110,8 +106,8 @@ function growLeaves() {
 
   const TOTAL = 700;       // densidad general
   let placed = 20;
-  let attempts = 10;
-  const MAX_ATTEMPTS = TOTAL * 95;
+  let attempts = 50;
+  const MAX_ATTEMPTS = TOTAL * 90;
 
   // =========================
   // CUERPO PRINCIPAL
@@ -123,12 +119,12 @@ function growLeaves() {
     let nx =
       Math.sign(Math.random() - 0.55) *
       Math.pow(Math.random(), 0.55) *
-      1.05;
+      1.5;
 
     let ny =
       Math.sign(Math.random() - 0.5) *
       Math.pow(Math.random(), 0.6) *
-      0.95;
+      0.75;
 
     ny *= 14; // ligera compresión vertical (no aplastado)
 
@@ -259,9 +255,70 @@ function blowAwayLeaves() {
   spawnLeaves();
 }
 
+// -------------------------------------------------------------
+// Efecto máquina de escribir para texto en el lado izquierdo
+function typeWriter(text, element, speed = 500) {
+  let i = 0;
+  // cursor ya añadido en CSS, lo creamos dinámicamente
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  element.appendChild(cursor);
+
+  function writing() {
+    if (i < text.length) {
+      const ch = text[i];
+      if (ch === '\n') {
+        const br = document.createElement('br');
+        cursor.parentNode.insertBefore(br, cursor);
+      } else {
+        cursor.insertAdjacentText('beforebegin', ch);
+      }
+      i++;
+      setTimeout(writing, speed);
+    }
+  }
+  writing();
+}
+
+// helper para iniciar el efecto de máquina de escribir cuando se desee
+function startTypewriter() {
+  const tw = document.getElementById('typewriter');
+  if (tw) {
+    const mensaje = 'Para el amor de mi vida: \nSi pudiera elegir a una persona para pasar el resto\nde mi vida, serías tú. \nTe amo mucho mi amor.';
+    typeWriter(mensaje, tw, 120);
+  }
+}
+// animación de título de San Valentín: letra a letra con brillo y escritura
+function animateValentineTitle(el) {
+  const text = el.textContent.trim();
+  el.textContent = '';
+  const chars = Array.from(text);
+  chars.forEach((ch, idx) => {
+    const span = document.createElement('span');
+    // mantener espacios visibles y separados
+    if (ch === ' ') {
+      span.textContent = '\u00A0'; // non‑breaking space
+      span.classList.add('space');
+    } else {
+      span.textContent = ch;
+    }
+    el.appendChild(span);
+  });
+
+  const spans = Array.from(el.querySelectorAll('span'));
+  let delay = 0;
+  spans.forEach((s, i) => {
+    delay += 80; // velocidad del bolígrafo
+    setTimeout(() => {
+      s.classList.add('write');
+      // después de que haya aparecido, añadir clase visible para brillo
+      setTimeout(() => s.classList.add('visible'), 400);
+    }, delay);
+  });
+}
 // Contador de tiempo desde 11 de septiembre de 2021
 function updateLoveCounter() {
-  const start = new Date(2021, 8, 11, 0, 0, 0); // monthIndex 8 = septiembre
+  const start = new Date(2021, 8, 13, 0, 0, 0); // monthIndex 8 = septiembre
   const el = document.getElementById('counter');
   if (!el) return;
 
@@ -285,7 +342,9 @@ function updateLoveCounter() {
     }
     if (months < 0) { months += 12; years--; }
 
-    el.textContent = `${years} años, ${months} meses, ${days} días — ${hours}h ${minutes}m ${seconds}s`;
+    // siempre generamos un <br> entre el conteo de días y la hora;
+    // la hoja de estilos decide si se muestra o no (visible en móviles pequeños)
+    el.innerHTML = `${years} años, ${months} meses, ${days} días<br>— ${hours}h ${minutes}m ${seconds}s`;
   }
 
   calc();
@@ -315,6 +374,14 @@ function revealMessage() {
     // añadir un espacio al final para mantener separación visual
     span.textContent = (w === '') ? ' ' : w + (i < words.length - 1 ? ' ' : '');
     label.appendChild(span);
+    // si estamos en dispositivo muy estrecho, insertar salto de línea después de "ti"
+    if (
+      (window.innerWidth <= 390 && window.innerHeight <= 844) &&
+      w.toLowerCase().trim() === 'ti'
+    ) {
+      const br = document.createElement('br');
+      label.appendChild(br);
+    }
   }
 
   // Añadir clase show para activar transiciones del contador
