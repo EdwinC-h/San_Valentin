@@ -1,0 +1,492 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  background: #ffe2a5ad;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+#scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/*CORAZÓN */
+#heart {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  background: rgb(184, 0, 0);
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 8px; /* suavizar la esquina inferior puntiaguda */
+  cursor: pointer;
+  z-index: 10;
+  transition: 
+    width 0.5s ease,
+    height 0.5s ease,
+    transform 0.6s ease,
+    border-radius 0.6s ease;
+}
+
+#heart::before,
+#heart::after {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: rgb(184, 0, 0);
+  border-radius: 50%;
+  transition: opacity 0.4s ease;
+}
+
+#heart::before {
+  top: -30px;
+  left: 0;
+}
+
+#heart::after {
+  left: -30px;
+  top: 0;
+}
+
+/*SEMILLA */
+#heart.seed {
+  background: #c50000;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  transform: translateX(-50%) rotate(0deg) scale(0.9);
+}
+
+#heart.seed::before,
+#heart.seed::after {
+  opacity: 0;
+}
+
+/*CAÍDA */
+#heart.fall {
+  transition: top 0.7s ease-in;
+  top: 80.5%;
+}
+
+/* Semilla desaparece */
+#heart.hide {
+  opacity: 0;
+  transform: scale(0.2);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/*SUELO */
+#ground {
+  position: absolute;
+  top: 82.5%;
+  left: 50%;
+  height: 3px;
+  width: 0;
+  background: #552100;
+  transform: translateX(-50%);
+  transition: width 0.5s ease;
+  z-index: 5;
+}
+
+#ground.show {
+  width: 100%;
+}
+
+/* TRONCO */
+#tree {
+  position: relative;
+  left: 0;
+  transform: none;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* IMAGEN */
+#tree img {
+  height: 300px;
+  width: auto;
+  display: block;
+  pointer-events: none;
+
+  /*BARRIDO */
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 1.6s ease-out;
+}
+
+/* CUANDO CRECE */
+#tree.grow img {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 0.9s ease-out;
+}
+
+#leaves {
+  position: absolute;
+  bottom: 60px; /* encima del tronco */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 260px;
+  pointer-events: none;
+  z-index: 7;
+}
+
+.leaf {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: red;
+  transform: rotate(45deg);
+  opacity: 0;
+  animation: leafPop 0.6s ease forwards;
+}
+
+.leaf::before,
+.leaf::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.leaf::before {
+  top: -5px;
+  left: 0;
+}
+
+.leaf::after {
+  left: -5px;
+  top: 0;
+}
+
+@keyframes leafPop {
+  from {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* CONTENEDOR ÁRBOL */
+#tree-container {
+  position: absolute;
+  bottom: 96.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: transform 2.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* Movimiento natural hacia la derecha */
+#tree-container.move-left {
+  transform: translateX(calc(-50% + 280px));
+}
+
+/* Mensaje y contador debajo del suelo */
+#message {
+  position: absolute;
+  top: 70%;
+  left: 30%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 6;
+  color: #6b0a17;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+#message .label {
+  font-size: 20px;
+  opacity: 0.9;
+  margin-bottom: 6px;
+}
+
+#counter {
+  font-size: 25px;
+  font-weight: 600;
+  color: #b3002d;
+}
+
+/* Animación letra por letra */
+#message .label span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(8px);
+  margin-right: 10px; /* más separación entre palabras */
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+#message.show .label span.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Mostrar contador cuando el mensaje aparece completamente (se activa con show-counter) */
+#counter {
+  opacity: 0;
+  transition: opacity 400ms ease 200ms;
+}
+
+#message.show-counter #counter {
+  opacity: 1;
+}
+
+/* Texto inicial "para Paula" */
+#intro {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: 700;
+  color: #6b0a17;
+  z-index: 12;
+  pointer-events: none;
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.hidden {
+  opacity: 0 !important;
+  transform: translateX(-50%) translateY(-6px);
+  pointer-events: none;
+}
+
+/* Título que aparece cuando el árbol empieza a crecer */
+#grow-title {
+  position: absolute;
+  bottom: 360px; /* encima del tronco al inicio */
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  font-size: 20px;
+  font-weight: 700;
+  color: #6b0a17;
+  z-index: 12;
+  opacity: 0;
+  transition: opacity 300ms ease, transform 300ms ease;
+  pointer-events: none;
+}
+
+#grow-title.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Título final de San Valentín */
+#valentine-title {
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  font-family: "Harlow Solid Italic", 'Great Vibes', cursive;
+  font-size: 44px;
+  color: #b3002d;
+  text-align: center;
+  z-index: 20;
+  opacity: 0;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.12);
+  transition: opacity 500ms ease, transform 500ms ease;
+  pointer-events: none;
+}
+
+#valentine-title.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* HOJAS VOLANDO POR EL VIENTO */
+.flying-leaf {
+  position: fixed;
+  width: 16px;
+  height: 16px;
+  background: red;
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 8;
+}
+
+.flying-leaf::before,
+.flying-leaf::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: 50%;
+}
+
+.flying-leaf::before {
+  top: -50%;
+  left: 0;
+}
+
+.flying-leaf::after {
+  left: -50%;
+  top: 0;
+}
+
+@keyframes windBlown {
+  0% {
+    transform: translateX(0) translateY(0) rotate(45deg) scale(0.6);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+    transform: translateX(0) translateY(4px) rotate(30deg) scale(1);
+  }
+  100% {
+    transform: translateX(-600px) translateY(400px) rotate(720deg) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes windBlown2 {
+  0% {
+    transform: translateX(0) translateY(0) rotate(45deg) scale(0.6);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+    transform: translateX(0) translateY(6px) rotate(10deg) scale(1);
+  }
+  100% {
+    transform: translateX(-400px) translateY(500px) rotate(360deg) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes windBlown3 {
+  0% {
+    transform: translateX(0) translateY(0) rotate(45deg) scale(0.6);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+    transform: translateX(0) translateY(5px) rotate(20deg) scale(1);
+  }
+  100% {
+    transform: translateX(-800px) translateY(450px) rotate(540deg) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes windBlown4 {
+  0% {
+    transform: translateX(0) translateY(0) rotate(45deg) scale(0.6);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+    transform: translateX(0) translateY(6px) rotate(15deg) scale(1);
+  }
+  100% {
+    transform: translateX(200px) translateY(480px) rotate(450deg) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Media queries para dispositivos pequeños */
+@media (max-width: 768px) {
+  #heart { top: 36%; }
+  #tree img { height: clamp(160px, 30vh, 300px); }
+  #leaves { width: clamp(180px, 60vw, 320px); height: clamp(140px, 28vh, 260px); }
+  #tree-container { bottom: 174px; }
+  #tree-container.move-left { transform: translateX(calc(-50% + 25vw)); }
+  #grow-title { bottom: 340px; font-size: clamp(14px, 3.2vw, 20px); }
+  #valentine-title { font-size: clamp(22px, 8vw, 44px); top: 6%; }
+  #message { top: 75%; }
+  #message .label { font-size: clamp(12px, 3vw, 16px); }
+  #counter { font-size: clamp(14px, 3.5vw, 18px); }
+}
+
+@media (max-width: 420px) {
+  /* Ajustes más agresivos para pantallas muy pequeñas */
+  #heart { width: 44px; height: 44px; top: 34%; }
+  #tree img { height: clamp(140px, 28vh, 220px); }
+  #leaves { width: 180px; height: 140px; bottom: 28px; }
+  #tree-container.move-left { transform: translateX(calc(-50% + 14vw)); }
+  #grow-title { bottom: 110px; font-size: 14px; }
+  #valentine-title { font-size: 20px; top: 4%; }
+  #message { top: 88%; left: 50%; transform: translateX(-50%); padding: 0 12px; }
+  #message .label { font-size: 13px; margin-bottom: 4px; }
+  #counter { font-size: 13px; }
+  .flying-leaf { width: 12px; height: 12px; }
+}
+
+/* Reduce motion preference respect */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* Ajustes específicos para dispositivo 390x844 (portrait) */
+@media (width: 390px) and (height: 844px) and (orientation: portrait) {
+  /* Corazón ligeramente más grande y más arriba */
+  #heart { top: 36%; width: 60px; height: 60px; }
+
+  /* Tronco y hojas más compactas */
+  #tree img { height: 220px;}
+  #leaves { width: 200px; height: 160px; bottom: 58px; }
+
+  /* Posicionamiento del contenedor y desplazamiento reducido */
+  #tree-container { bottom: 144px; left: 50%;}
+  #tree-container.move-left { transform: translateX(calc(-50% + 30vw)); }
+
+  /* Títulos y mensaje */
+  #grow-title { bottom: 230px; font-size: 16px; }
+  #valentine-title { font-size: 24px; top: 6%; }
+  #message { top: 76%; width: 80%; left: 40%; transform: translateX(-50%); }
+  #message .label { font-size: 14px; }
+  #counter { font-size: 14px; }
+
+  /* Hojas voladoras más pequeñas */
+  .flying-leaf { width: 12px; height: 12px; }
+}
+
+@keyframes windBlown5 {
+  0% {
+    transform: translateX(0) translateY(0) rotate(45deg) scale(0.6);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+    transform: translateX(0) translateY(6px) rotate(12deg) scale(1);
+  }
+  100% {
+    transform: translateX(-200px) translateY(520px) rotate(650deg) scale(1);
+    opacity: 0;
+  }
+}
+
+.flying-leaf.blow {
+  animation: windBlown 3s ease-in forwards;
+}
+
+.flying-leaf.blow2 {
+  animation: windBlown2 3s ease-in forwards;
+}
+
+.flying-leaf.blow3 {
+  animation: windBlown3 3s ease-in forwards;
+}
+
+.flying-leaf.blow4 {
+  animation: windBlown4 3s ease-in forwards;
+}
+
+.flying-leaf.blow5 {
+  animation: windBlown5 3s ease-in forwards;
+}
